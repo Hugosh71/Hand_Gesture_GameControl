@@ -1,0 +1,47 @@
+# ── Environnements virtuels ───────────────────────────────────────────────────
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Données HaGRID (annotations volumineuses, plusieurs Go) ──────────────────
+cv-gesture-gamecontrol/data/raw/
+
+# ── CSVs de landmarks générés (reconstruisibles via build_landmarks_csv.py) ───
+# landmarks_own.csv est conservé (corpus d'adaptation, léger)
+cv-gesture-gamecontrol/data/processed/landmarks_train.csv
+cv-gesture-gamecontrol/data/processed/landmarks_val.csv
+cv-gesture-gamecontrol/data/processed/landmarks_test.csv
+cv-gesture-gamecontrol/data/processed/landmarks_combined.csv
+
+# ── Modèle MediaPipe (7.5 MB — téléchargé automatiquement par le notebook) ───
+cv-gesture-gamecontrol/models/hand_landmarker.task
+
+# Note : les fichiers .joblib (gesture_lr*.joblib, ~4.5 KB chacun) SONT inclus :
+# ils sont nécessaires pour faire tourner les démos sans réentraînement complet.
+
+# ── Outputs et rapports générés ───────────────────────────────────────────────
+cv-gesture-gamecontrol/outputs/
+cv-gesture-gamecontrol/reports/
+
+# ── Assets externes volumineux ────────────────────────────────────────────────
+cv-gesture-gamecontrol/external/hagrid/images/demo.gif
+
+# ── Scripts de patch (artefacts de développement, non utiles au rendu) ────────
+patch_*.py
+add_section*.py
+build_notebook.py
+patch_cell.py
+
+# ── Divers ────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+.claude/

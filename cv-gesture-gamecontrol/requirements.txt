@@ -1,0 +1,9 @@
+opencv-python
+mediapipe
+numpy
+scikit-learn
+tqdm
+pyyaml
+joblib
+pyautogui
+pandas
