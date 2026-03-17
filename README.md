@@ -47,9 +47,11 @@ Hand_gesture_VG/
 
 ## Prérequis
 
-- Python **3.10** ou **3.11** (MediaPipe ne supporte pas encore Python 3.12 de manière stable)
+- Python **3.10** ou **3.11** — MediaPipe n'est pas encore compatible avec Python 3.12+
 - Une webcam fonctionnelle (pour les démos locales)
 - Environ **3 GB** d'espace disque libre (annotations HaGRID ~680 MB + CSVs générés ~220 MB + marge)
+
+> **Utilisateurs Mac** : voir la section [Problèmes connus sur Mac](#problèmes-connus-sur-mac) avant d'installer.
 
 ---
 
@@ -168,6 +170,36 @@ Le notebook constitue le support principal du rendu. Il s'appuie sur plusieurs s
 | `mario_gesture.py` | Intégration Mario : `GestureInput`, `run_mario_game()` |
 
 Les choix de conception de ces scripts sont documentés et analysés dans les sections correspondantes du notebook.
+
+---
+
+## Problèmes connus sur Mac
+
+### pygame — `SDL.h file not found`
+
+Sur macOS, pygame nécessite SDL installé via Homebrew. Sans ça, la compilation échoue avec :
+```
+fatal error: 'SDL.h' file not found
+```
+
+**Fix :**
+```bash
+brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
+pip install pygame
+```
+Si Homebrew n'est pas installé : [https://brew.sh](https://brew.sh)
+
+### Python 3.12+ incompatible avec MediaPipe
+
+MediaPipe ne supporte pas encore Python 3.12 ou supérieur. Si votre Mac tourne sur Python 3.14 (ou 3.12/3.13), l'installation de `mediapipe` échouera silencieusement ou produira des erreurs à l'exécution.
+
+**Fix — installer Python 3.11 et créer un environnement dédié :**
+```bash
+brew install python@3.11
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
 ---
 
