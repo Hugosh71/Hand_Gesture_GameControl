@@ -9,7 +9,7 @@ Pipeline : MediaPipe HandLandmarker → features landmarks 42D normalisées → 
 ## Structure du dépôt
 
 ```
-Hand_gesture_VG/
+Hand_gesture_GameControl/
 │
 ├── cv-gesture-gamecontrol/               # Dossier principal du projet
 │   ├── HandGesture_FANCHINI_CINTRA_ZHANG.ipynb   # Notebook principal (rendu)
@@ -77,7 +77,7 @@ pip install -r requirements.txt
 
 ```bash
 cd cv-gesture-gamecontrol
-jupyter notebook HandGesture_FANCHINI_CINTRA_ZHANG.ipynb
+# jupyter notebook HandGesture_FANCHINI_CINTRA_ZHANG.ipynb si usage hors vscode
 ```
 
 En exécutant les cellules dans l'ordre, le notebook gère automatiquement toute la chaîne de préparation :
@@ -129,7 +129,7 @@ from flappy import run_flappy_game
 run_flappy_game(
     model_task=Path('cv-gesture-gamecontrol/models/hand_landmarker.task'),
     clf_path=Path('cv-gesture-gamecontrol/models/gesture_lr_adapted.joblib'),
-    show_preview=True,
+    show_preview=True,   # mettre False sur Mac (cv2.imshow interdit depuis un thread secondaire)
 )
 ```
 
@@ -147,7 +147,7 @@ from mario_gesture import run_mario_game
 run_mario_game(
     model_task=Path('cv-gesture-gamecontrol/models/hand_landmarker.task'),
     clf_path=Path('cv-gesture-gamecontrol/models/gesture_lr_adapted.joblib'),
-    show_preview=True,
+    show_preview=True,   # mettre False sur Mac (cv2.imshow interdit depuis un thread secondaire)
 )
 ```
 
@@ -199,6 +199,65 @@ brew install python@3.11
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Webcam inaccessible depuis le notebook (`not authorized to capture video`)
+
+Sur macOS, OpenCV ne peut pas accéder à la caméra depuis un thread secondaire (ce que fait notre architecture à deux threads). L'erreur typique :
+```
+OpenCV: not authorized to capture video (status 0)
+OpenCV: can not spin main run loop from other thread
+RuntimeError: Impossible d'ouvrir la webcam.
+```
+
+**Fix — lancer Jupyter avec la variable d'environnement suivante :**
+```bash
+OPENCV_AVFOUNDATION_SKIP_AUTH=1 
+```
+macOS affichera une popup de permission caméra à la première exécution — accepter.
+
+### Preview webcam (`cv2.error: Unknown C++ exception`) — Flappy Bird / Mario
+
+Sur macOS, `cv2.imshow()` ne peut pas être appelé depuis un thread secondaire (contrainte Cocoa). Notre moteur gestuel tourne dans un thread daemon — la preview caméra plante donc systématiquement sur Mac.
+
+**Fix — désactiver la preview dans les cellules de démo :**
+```python
+# Flappy Bird
+run_flappy_game(model_task=_MODEL_TASK, clf_path=_CLF_PATH, show_preview=False)
+
+# Mario
+run_mario_game(model_task=_MODEL_TASK, clf_path=_CLF_PATH, show_preview=False)
+```
+Le jeu fonctionne normalement, seule la fenêtre de visualisation de la webcam est désactivée.
+
+### Conflits SDL (`Class SDLApplication is implemented in both cv2 and pygame`)
+
+`opencv-python` et `pygame` embarquent chacun leur propre copie de SDL, ce qui génère des warnings au démarrage. Ces warnings sont inoffensifs mais peuvent provoquer des crashs aléatoires.
+
+**Fix 1 — remplacer `opencv-python` par la version sans interface graphique (recommandé) :**
+```bash
+pip uninstall opencv-python
+pip install opencv-python-headless
+```
+
+**Fix 2 — si `pip install opencv-python-headless` échoue (réseau ou autre) :**
+Supprimer manuellement la copie de SDL embarquée par cv2 :
+```bash
+rm .venv/lib/python3.11/site-packages/cv2/.dylibs/libSDL2-2.0.0.dylib
+```
+(Remplacer `python3.11` par votre version si nécessaire.)
+
+### Impossible d'interrompre une cellule pygame depuis Jupyter
+
+Quand une démo Flappy Bird ou Mario est lancée depuis le notebook, le bouton "Interrupt Kernel" de Jupyter peut ne pas arrêter la cellule (la fenêtre pygame reste ouverte).
+
+**Fix — fermer la fenêtre pygame en cliquant le bouton X.** Cela déclenche l'événement `pygame.QUIT` et la fonction retourne proprement. En dernier recours, Ctrl+C dans le terminal qui a lancé Jupyter fonctionne aussi.
+
+**En résumé pour Mac, après l'installation initiale :**
+```bash
+pip uninstall opencv-python
+pip install opencv-python-headless
+OPENCV_AVFOUNDATION_SKIP_AUTH=1 jupyter notebook
 ```
 
 ---
